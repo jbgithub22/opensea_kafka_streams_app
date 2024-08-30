@@ -1,6 +1,7 @@
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.KStream;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,9 +11,11 @@ public class KafkaStreamsApp {
 
     public static void main(String[] args) {
         // Set up the configuration properties
-        Properties config = new Properties();
-        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-streams-app");
-        config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9097");
+        Properties props = new Properties();
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "my-streams-app");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaAdminClientFactory.getKafkaAddress());
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, "org.apache.kafka.common.serialization.Serdes$StringSerde");
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, "org.apache.kafka.common.serialization.Serdes$StringSerde");
 
         // Create a StreamsBuilder object
         StreamsBuilder builder = new StreamsBuilder();
@@ -65,12 +68,21 @@ public class KafkaStreamsApp {
         });
 
         // Build the KafkaStreams object with the configuration properties and the StreamsBuilder
-        KafkaStreams streams = new KafkaStreams(builder.build(), config);
+        KafkaStreams streams = new KafkaStreams(buildTopology(), props);
 
         // Start the KafkaStreams application
         streams.start();
 
         // Add shutdown hook to gracefully close the KafkaStreams application
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+    }
+
+        private static Topology buildTopology() {
+        // Define the topology for the Kafka Streams application
+        StreamsBuilder builder = new StreamsBuilder();
+        builder.stream("input-topic")
+               .mapValues(value -> value.toString().toUpperCase())
+               .to("output-topic");
+        return builder.build();
     }
 }

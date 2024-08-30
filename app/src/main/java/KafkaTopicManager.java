@@ -5,17 +5,14 @@ import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.common.KafkaFuture;
 
 import java.util.Collections;
-import java.util.Properties;
 import java.util.Set;
 
 public class KafkaTopicManager {
 
     private final AdminClient adminClient;
 
-    public KafkaTopicManager(String bootstrapServers) {
-        Properties adminProps = new Properties();
-        adminProps.put("bootstrap.servers", bootstrapServers);
-        this.adminClient = AdminClient.create(adminProps);
+    public KafkaTopicManager() {
+        this.adminClient = KafkaAdminClientFactory.createAdminClient();
     }
 
     public void createTopicIfNotExists(String topic) {

@@ -3,9 +3,15 @@ import java.util.Properties;
 
 public class KafkaAdminClientFactory {
 
-    public static AdminClient createAdminClient(String bootstrapServers) {
+    private static final String KAFKA_ADDRESS = "localhost:9097";
+
+    public static AdminClient createAdminClient() {
         Properties adminProps = new Properties();
-        adminProps.put("bootstrap.servers", bootstrapServers);
+        adminProps.put("bootstrap.servers", KAFKA_ADDRESS);
         return AdminClient.create(adminProps);
+    }
+
+    public static String getKafkaAddress() {
+        return KAFKA_ADDRESS;
     }
 }
